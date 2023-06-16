@@ -114,9 +114,16 @@ def _makeSampleSize(terms: list, resolution: int) -> np.array:
 
 
 def _makeBasicTerms(terms: list, base: list, sampleSize: int) -> list:
-    """ Selects the basic factors of the model from the list of terms. """
+    """ Selects the basic factors of the model from the list of terms. 
+        Inputs:
+            terms: List of factor names in the design
+            base : List of base factors in the design
+            sampleSize: Number of runs for the design
+        Outputs:
+            List of basic factors for the design
+    """
 
-    # Get the term with the highest level of interaction (i.e. highest character count
+    # Get the term with the highest level of interaction (i.e. highest character count)
     termSize = [len(t) for t in terms]
     maxInter = terms[np.argmax(termSize)]
 
@@ -133,7 +140,14 @@ def _makeBasicTerms(terms: list, base: list, sampleSize: int) -> list:
 
 
 def _makeAddedTerms(base: list, basic: list) -> list:
-    """ Returns the added factors of the model given its base and basic terms. """
+    """ Returns the added factors of the model given its base and basic terms. 
+        Inputs:
+            terms: List of factor names in the design
+            base : List of base factors in the design
+            sampleSize: Number of runs for the design
+        Outputs:
+            List of basic factors for the design
+    """
 
     added = list(set(base).difference(set(basic)))
     return sorted(added)
@@ -141,7 +155,13 @@ def _makeAddedTerms(base: list, basic: list) -> list:
 
 def _makeBasicEffectsGroup(terms: list, basic: list, resolution: int) -> list:
     """ Generates the basic effects of the model, i.e. all combinations of the basic 
-        terms according to the given resolution and the model,
+        terms according to the given resolution and the model.
+        Inputs:
+            terms     : List of factor names of the design
+            basic     : List of basic factors in the design
+            resolution: Required resolution of the design
+        Outputs:
+            basicEffects: Basig effects group
     """
 
     basicEffects = []
@@ -170,9 +190,15 @@ def _makeBasicEffectsGroup(terms: list, basic: list, resolution: int) -> list:
 
 
 def _makeBasic(terms: list, sampleSize: int, resolution: int) -> Tuple[list, list]:
-    """ Step 3: Selects a set of basic factors and forms the basic effects group, given
-        a list of names for the terms <terms>, the sample size of the design <k>,
-        and the required resolution <resolution>.
+    """ Step 3: Selects a set of basic factors and forms the basic effects group.
+        Inputs:
+            terms: List of factor names in the design
+            sampleSize: Number of runs of the design
+            resolution: Required design resolution
+        Outputs:
+            baseTerms   : Base factors of the design
+            addedTerms  : Added factors of the design
+            basicEffects: Basic effects group
      """
 
     baseTerms    = _getBase(terms)
@@ -184,7 +210,14 @@ def _makeBasic(terms: list, sampleSize: int, resolution: int) -> Tuple[list, lis
 
 
 def _makeTab(basicEffects: list, addedTerms: list, inelligible: list) -> np.array:
-    """ Step 4: Generates table of eligible effects. """
+    """ Step 4: Generates table of eligible effects. 
+        Inputs:
+            basicEffects: Basic effects group
+            addedTerms  : Added factors in the design
+            inelligible : Inelligible effects set
+        Outputs:
+            Matrix containing the eligible effects
+    """
 
     tab = np.empty(shape = (len(basicEffects), len(addedTerms)), dtype = 'U52')
 
@@ -200,7 +233,14 @@ def _makeTab(basicEffects: list, addedTerms: list, inelligible: list) -> np.arra
 def _getInteractions(
     generator: str, contrasts: list, inelligibleSet: list) -> Tuple[bool, list]:
     """ Step 8: Checks whether all generalized interactions between the 
-        current generator and the defining contrasts group are eligible
+        current generator and the defining contrasts group are eligible.
+        Inputs:
+            generator     : Generator string of the design
+            contrasts     : Set of defining contrasts found so far
+            inelligibleSet: Set of inelligible effects
+        Outputs:
+            eligible   : Indicator whether the current generator is an eligible effect
+            interaction: Generalised interactions
     """
     
     empty        = all([c is None for c in contrasts])
@@ -222,15 +262,28 @@ def _getInteractions(
 
 
 def _getResolution(contrasts: list) -> int:
-    """ Computes the resolution of a design """
+    """ Computes the resolution of a design. 
+        Inputs:
+            contrasts: Set of defining contrasts
+        Outputs:
+            resolution of the design
+    """
     return min([len(c) for c in contrasts])
 
 
-def _addGenerator(
-    gens: list, col: int, curSelection: list, addedTerms: list,
-    baseTerms:list, basicEffects: list) -> list:
+def _addGenerator(gens: list, col: int, curSelection: list, 
+    addedTerms: list, baseTerms:list, basicEffects: list) -> list:
     """ Adds a generator to the appropriate place (index) in 
         the list of the design's generators.
+        Inputs:
+            gens        : List of generators, one for each column of the contrasts table
+            col         : Current column being evaluated
+            curSelection: Generators selected in this iteration of the algorithm
+            addedTerms  : Added factors of the design
+            baseTerms   : Base factors of the design
+            basicEffects: Basic effects group
+        Outputs:
+            gens        : Updated list of generators
     """
     
     idx = baseTerms.index(addedTerms[col])
@@ -241,8 +294,15 @@ def _addGenerator(
 
 
 def _addContrast(generator: str, colNum: int, interactions: list, contrasts: list) -> list:
-    """ Adds a contrast to the appropriate place (index) in 
-        the list of the design's contrasts.
+    """ Adds a contrast to the appropriate place (index) in the list of the design's contrasts.
+        Inputs:
+            generator   : Generator string
+            colNum      : Current column being evaluated
+            interactions: Interactions between the currently selected generator and the 
+                          defining contrasts group
+            contrasts   : Set of defining contrasts
+        Outputs:
+            contrasts   : Updated set of defining contrasts
     """
 
     index = 2 ** colNum - 1
@@ -253,7 +313,13 @@ def _addContrast(generator: str, colNum: int, interactions: list, contrasts: lis
 
 
 def _removeContrast(contrasts: list, colNum: int) -> list:
-    """ Removes a contrast from the list of the design's contrasts. """
+    """ Removes a contrast from the list of the design's contrasts. 
+        Inputs:
+            constrasts: Set of defining contrasts
+            colNum: Current column of the constrasts table being operated upon
+        Outputs:
+            constrasts: Updated list with the defining contrasts    
+    """
 
     index = 2 ** colNum - 1
     contrasts[index] = None
@@ -263,7 +329,13 @@ def _removeContrast(contrasts: list, colNum: int) -> list:
 
 
 def _addBaseToGenerators(terms: list, gens: list) -> list:
-    """ Adds base term to its corresponding location in the generators """
+    """ Adds base term to its corresponding location in the generators. 
+        Inputs:
+            terms: List of factor names in the design
+            gens:  List of generators from each column of the contrasts table
+        Outputs:
+            gens: Updated list of generators from each column of the contrasts table
+    """
 
     n = _getNumBase(terms)
     for i, t in enumerate(terms):
@@ -274,7 +346,16 @@ def _addBaseToGenerators(terms: list, gens: list) -> list:
 
 
 def _searchContrasts(terms: list, inelligible: list, resolution: int, k: int) -> Tuple[list, int]:
-    """ Steps 3 - 10: Algorithm to search for the defining contrasts. """
+    """ Steps 3 - 10: Algorithm to search for the defining contrasts. 
+        Inputs:
+            terms       : Names of the factors in the design
+            inelligible : Inelligible effects set
+            resolution  : Required resolution of the design
+            k           : Sample size (number of runs) of the design
+        Outputs:
+            gens        : List of generators (one from each column of the defining contrasts table)
+            curRes      : Resolution of the current design
+    """
     
     base, added, effects = _makeBasic(terms, k, resolution)       # Step 3
     contrastsTab         = _makeTab(effects, added, inelligible)  # Step 4
@@ -324,13 +405,14 @@ def fracfactgen(terms: str, resolution: int = 3) -> str:
         by the term string, using the Franklin-Bailey algorithm [1, 2].
 
         Inputs:
-            terms:    string scalar consisting of words formed from the 52 case-sensitive letters a-Z, 
+            terms:      String scalar consisting of words formed from the 52 case-sensitive letters a-Z, 
                         separated by spaces. Use 'a'-'z' for the first 26 factors, and, if necessary, 
                         'A'-'Z' for the remaining factors. For example, terms = 'a b c ab ac'. Single-letter 
                         words indicate main effects to be estimated; multiple-letter words indicate interactions. 
             resolution: Required resolution of the design, defaults to 3
         
-        Outputs: The generator string for the smallest possible fractional factorial design.
+        Outputs: 
+            The generator string for the smallest possible fractional factorial design.
 
         References:
         [1] Selection of Defining Contrasts and Confounded Effects in Two-level Experiments. Franklin M.F., 
