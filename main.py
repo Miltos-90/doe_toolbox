@@ -1,11 +1,16 @@
 #%%
-import numpy as np
+import doe_box as dbox
+dbox.fullfact(levels = [5, 2])
 
 
 #%%
-from factorial import fullfact, ff2n, fracfact # TODO: No more than 26 factors
+dbox.fracfact('a b c abc')
 
-full = fullfact(levels = [2, 2])
+#%%
+
+#%%
+
+full = dbox.fullfact(levels = [2, 2, 3])
 frac = fracfact('a b c abc')
 ff2  = ff2n(3)
 print(full)
