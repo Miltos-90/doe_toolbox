@@ -20,7 +20,7 @@ It includes:
 The package can be easily installed with pip via a DOS or Unix command shell:
 
 ```bash
-pip install XXXXXXXXXXXXXXXXXXXXXX
+pip install doe-toolbox
 ```
 
 ### Requirements
