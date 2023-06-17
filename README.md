@@ -39,10 +39,10 @@ See `requirements.txt` file
 
 ##### Description
 
-The `fullfact` function  outputs factor settings for a full factorial design with *n* factors, where the number of levels for each factor is given by the vector `levels` of length *n*. 
+Full factorial designs consist of two or more factors, each with discrete possible values or "levels", and whose experimental units take on all possible combinations of these levels across all such factors.
+Such designs can be generated using the `fullfact` function  outputs factor settings for a full factorial design with *n* factors, where the number of levels for each factor is given by the vector `levels` of length *n*. 
 
 The output is an *m*-by-*n* numpy array, where *m* is the number of treatments in the full-factorial design. 
-
 Each row corresponds to a single treatment, and each column contains the settings for a single factor, with floating point scalars ranging from -1 to +1.
 
 ##### Example
@@ -67,12 +67,16 @@ array([[-1. , -1. ],
 
 ##### Description
 
-The `fracfact` function creates the two-level fractional factorial designs defined by the generator `gen`, which is a (case-sensitive) string listing the factors in the design, formed from the 52 case-sensitive letters *a*-*Z*, separated by spaces.
+Fractional factorial designs are experimental designs consisting of a carefully chosen subset (fraction) of the experimental runs of a full factorial design. 
+The subset is chosen so as to exploit the sparsity-of-effects principle to expose information about the most important features of the problem studied, while using a fraction of the effort of a full factorial design in terms of experimental runs and resources. 
+In simple terms, it makes use of the fact that many experiments in full factorial design are often redundant, giving little or no new information about the system.
+
+Such designs can be generated using the `fracfact` function, which creates the two-level fractional factorial designs defined by the generator `gen`. 
+The latter is a (case-sensitive) string listing the factors in the design, formed from the 52 case-sensitive letters *a*-*Z*, separated by spaces.
 Standard convention notation indicates to use *a*-*z* for the first 26 factors, and, if necessary, *A*-*Z* for the remaining factors. 
 A valid example would be: `gen = 'a b c abc'`.
 
 Similar to the previous, the output is an *m*-by-*n* numpy array, where *m* is the number of treatments in the fractional-factorial design. 
-
 Each row corresponds to a single treatment, and each column contains the settings for a single factor, with floating point scalars ranging from -1 to +1.
 
 ##### Example
@@ -140,35 +144,106 @@ The following will determine the effects of four two-level factors, for which th
 
 ##### Description
 
-Central Composite Designs (CCDs) can be generated using the `ccdesign` function. 
+Central Composite Designs (CCDs) are a type of experimental design useful in response surface methodology, for building a second order (quadratic) model for the response variable without needing to use a complete three-level factorial experiment. Such designs can be generated using the `ccdesign` function. 
 It needs the following input arguments:
 
-* `numFactors`: Number of factors in the design. Must be an integer higher than *2*.
+* `numFactors`: Number of factors in the design. Must be an integer at least equal to *2*.
 
 The following optional arguments can be set:
 *  `fraction`: Integer indicating the fraction of full-factorial cube, expressed as an exponent of 1/2. If not set by the user, the default values are the following:
-
-
+    * 0, i.e. full factorial design, when `numFactors` &le; 4
+    * 1, i.e. a 1/2 fraction design, when 4 <  `numFactors` &le;  7 or `numFactors` > 11
+    * 2, i.e. a 1/4 fraction design, when 7 < `numFactors` &le;  9 
+    * 3, i.e. a 1/8 fraction design, when `numFactors` = 10 
+    * 4, i.e. a 1/16 fraction design, when `numFactors` = 11
 * `centerPoints`: Number of center points to be added in the factorial and axial parts of the design.
     Can be one of:
     * 'orthogonal' (default): Number of center points will be computed so that an orthogonal design will be provided.
     * 'uniform'   : Number of center points will be computed so that uniform precision will be achieved.
     * A strictly positive integer, specifying the number of center points directly.
-
 * `designType`: It defines the type of the CCD. 
     Can be one of:
     * 'circumscribed' (default): It is the original type of CCD, where axial points are located at distance *a* from the center point.
     * 'inscribed' : The inscribed CCD is characterized by that axial points are 
                     located at factor levels *−1* and *1*, while the factorial points are brought into the interior of the design space and are located at distance *1/a* from the center point.
     * 'faced': In a face-centered CCD, the axial points are located at a distance equal to *1* from the center point, i.e. at the face of the design cube if the design involves three experimental factors.
-        
-       
+
+For *n > 2* factors, the output DoE matrix has dimensions *m* by *n*, with *m* being the number of runs in the design. 
+Each row represents one run, with settings for all factors represented in the corresponding columns. The resulting factor values are normalized, so that the cube points take values between *-1* and *1*.
+
+##### Example
+The following generates a two-factor, full-factorial, circumscribed, orthogonal CCD:
+
+```python
+>>> dbox.ccdesign(numFactors = 2)
+
+array([[-1.        , -1.        ],
+       [-1.        ,  1.        ],
+       [ 1.        , -1.        ],
+       [ 1.        ,  1.        ],
+       [-1.41421356, -0.        ],
+       [ 1.41421356,  0.        ],
+       [-0.        , -1.41421356],
+       [ 0.        ,  1.41421356],
+       [ 0.        ,  0.        ],
+       [ 0.        ,  0.        ],
+       [ 0.        ,  0.        ],
+       [ 0.        ,  0.        ],
+       [ 0.        ,  0.        ],
+       [ 0.        ,  0.        ],
+       [ 0.        ,  0.        ],
+       [ 0.        ,  0.        ]])
+```
+
+#### bbdesign
+
+##### Description
+
+Box–Behnken designs are experimental designs also used in response surface methodology, for the estimation of second order (quadratic) models for the response variable.
+Box-Behnken designs are considered to be more proficient and most powerful than CCD designs, despite their poor coverage of the corners of nonlinear design spaces.
+
+This type of design can be generated using the `bbdesign` function, which takes the following input arguments:
+
+* `numFactors`: Number of factors in the design. Must be an integer at least equal to *3*.
+* `numCenter` : Number of centerpoints in the design. It is an optional argument, and if no input is provided, a pre-determined number of points are automatically included, whose number depends on the value of `numFactors`.
+
 For *n > 2* factors, the output DoE matrix has dimensions *m* by *n*, with *m* being the number of runs in the design. 
 Each row represents one run, with settings for all factors represented in the corresponding columns. The resulting factor values are normalized, so that the cube points thaveake values between *-1* and *1*.
 
+The output matrix dBB is m-by-n, where m is the number of runs in the design. Each row represents one run, with settings for all factors represented in the columns. Factor values are normalized so that the cube points take values between -1 and 1.
+
+
 ##### Example
+The following generates a two-factor, full-factorial, circumscribed, orthogonal CCD:
+
+```python
+>>> dbox.bbdesign(numFactors = 3)
+
+array([[-1, -1,  0],
+       [-1,  1,  0],
+       [ 1, -1,  0],
+       [ 1,  1,  0],
+       [-1,  0, -1],
+       [-1,  0,  1],
+       [ 1,  0, -1],
+       [ 1,  0,  1],
+       [ 0, -1, -1],
+       [ 0, -1,  1],
+       [ 0,  1, -1],
+       [ 0,  1,  1],
+       [ 0,  0,  0],
+       [ 0,  0,  0],
+       [ 0,  0,  0]])
+```
 
 ### Latin Hypercube Sampling <a name="lhs"></a>
+
+Latin Hypercube Sampling (LHS) is a statistical sampling technique used to efficiently explore the parameter space of a system or model. It is commonly employed in simulation studies, sensitivity analysis, and optimization problems.
+
+In LLHS, the range of each input variable or factor is divided into equally spaced intervals. Within each interval, a single sample point is randomly selected. The key feature of LHS is that it ensures that each level or bin of each factor occurs exactly once in the sampled dataset, providing a representative and evenly distributed coverage of the parameter space.
+
+To generate a design of this type, the `lhs` function can be used.
+
 
 ## References
 

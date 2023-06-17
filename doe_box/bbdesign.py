@@ -163,8 +163,8 @@ def bbdesign(numFactors: int, numCenter: int = None) -> np.array:
     """
 
     # Check inputs
-    if not isinstance(numFactors, int) or numFactors < 2:
-        raise ValueError('Number of factors should be an integer higher than or equal to 2.')
+    if not isinstance(numFactors, int) or numFactors < 3:
+        raise ValueError('Number of factors should be an integer higher than or equal to 3.')
 
     if numCenter is None: # Evaluate number of centerpoints if needed
         numCenter = getNumberCenterpoints(numFactors) 

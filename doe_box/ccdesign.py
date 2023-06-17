@@ -319,11 +319,12 @@ def ccdesign(
         fraction: Fraction of full-factorial cube, expressed as an exponent of 1/2.
     """
 
+
+    # Get fraction for the full factorial cube if not set
+    if fraction is None: fraction = makeFraction(numFactors)
+
     # Check inputs
     checkInputs(numFactors, centerPoints, designType, fraction)
-
-    # Get fraction for the full factorial cube
-    if fraction is None: fraction = makeFraction(numFactors)
 
     # Make cube portion of the design
     if fraction == 0: 

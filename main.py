@@ -29,12 +29,12 @@ for r in [3,4,5,6]:
 
 #%%
 
-dbox.ccdesign(3, 1, designType = 'circumscribed')
+dbox.ccdesign(numFactors = 2)
 
 
 # %%
 
-rs.bbdesign(numFactors = 3)
+dbox.bbdesign(numFactors = 3)
 
 # %%
 
