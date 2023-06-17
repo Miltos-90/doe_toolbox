@@ -296,6 +296,7 @@ To obtain a discrete design, the default value of `smooth` should be overwritten
 >>> np.random.seed(10) # Set the seed for reproducibility
 >>> x = dbox.lhs(numSamples = 10, numVariables = 3, smooth = False)
 >>> x 
+
 array([[0.75, 0.85, 0.15],
        [0.05, 0.95, 0.55],
        [0.65, 0.55, 0.05],
@@ -313,6 +314,7 @@ To see the effect of changing the default `criterion`, first evaluate the sum th
 ```python
 >>> corr  = np.corrcoef(x, rowvar = False) 
 >>> (sum(corr.flatten() ** 2) - 3)/2
+
 0.07004591368227708
 ```
 
