@@ -67,7 +67,9 @@ array([[-1. , -1. ],
 
 ##### Description
 
-The `fracfact` function creates the two-level fractional factorial designs defined by the generator `gen`.
+The `fracfact` function creates the two-level fractional factorial designs defined by the generator `gen`, which is a (case-sensitive) string listing the factors in the design, formed from the 52 case-sensitive letters *a*-*Z*, separated by spaces.
+Standard convention notation indicates to use *a*-*z* for the first 26 factors, and, if necessary, *A*-*Z* for the remaining factors. 
+A valid example would be: `gen = 'a b c abc'`.
 
 Similar to the previous, the output is an *m*-by-*n* numpy array, where *m* is the number of treatments in the fractional-factorial design. 
 
@@ -77,7 +79,6 @@ Each row corresponds to a single treatment, and each column contains the setting
 The following generates an eight-run fractional factorial design for four factors, in which the fourth factor is the product of the first three:
 
 ```python
->>> # import package if not imported.
 >>> gen = 'a b c abc'
 >>> dbox.fracfact(gen)
 
@@ -91,27 +92,81 @@ array([[-1, -1, -1, -1],
        [ 1,  1,  1,  1]])
 ```
 
+Note that more sophisticated generator strings can be created using the +" and "-" operators. The "-" operator will swap the column levels:
+
+```python
+>>> gen = 'a b c -abc'
+>>> dbox.fracfact(gen)
+
+array([[-1, -1, -1,  1],
+       [-1, -1,  1, -1],
+       [-1,  1, -1, -1],
+       [-1,  1,  1,  1],
+       [ 1, -1, -1, -1],
+       [ 1, -1,  1,  1],
+       [ 1,  1, -1,  1],
+       [ 1,  1,  1, -1]])
+```
+
 #### fracfactgen
 
 ##### Description
 
-The `fracfactgen` function ...
+The `fracfactgen` function uses the Franklin-Bailey algorithm to find generators for the smallest two-level fractional-factorial design.
+
+It requires two inputs:
+* `terms`: Is a string of factors formed formed from the 52 case-sensitive letters *a*-*Z*, separated by spaces.
+Standard convention notation indicates to use 'a'-'z' for the first 26 factors, and, if necessary, 'A'-'Z' for the remaining factors. 
+A valid example would be: `terms = 'a b c ab ac'`. 
+Single-letter factors indicate the main effects to be estimated, whereas multiple-letter factors indicate the interactions to be estimated. 
+You can pass the output generators of `fracfactgen` to `fracfact`, in order to produce the corresponding fractional-factorial design.
+* `resolution`: Is an integer indicating the required resolution of the design. A design of resolution *R* is one in which no *n*-factor interaction is confounded with any other effect containing less than *R – n* factors. Thus, a resolution *III* design does not confound main effects with one another but may confound them with two-way interactions, while a resolution *IV* design does not confound either main effects or two-way interactions but may confound two-way interactions with each other. It is an optional argument, with the default value being equal to 3.
+
+If `fracfactgen` is unable to find a design at the requested resolution, it tries to find a lower-resolution design sufficient to calibrate the model. If it is successful, it returns the generators for the lower-resolution design along with a warning. If it fails, an error is raised.
 
 ##### Example
+The following will determine the effects of four two-level factors, for which there may be two-way interactions. A full-factorial design would require 2<sup>4</sup> = 16 runs. The `fracfactgen` function will generators for a resolution *IV* (separating main effects) fractional-factorial design that requires only 2<sup>3</sup> = 8 runs:
 
 
 ```python
->>> # import package if not imported.
->>> 
->>>  
+>>> dbox.fracfactgen(terms = 'a b c d', resolution = 4)
 
-
+'a b c abc'
 ```
 
-
-
-
 ### Response Surface Designs <a name="rsm"></a>
+
+#### ccdesign
+
+##### Description
+
+Central Composite Designs (CCDs) can be generated using the `ccdesign` function. 
+It needs the following input arguments:
+
+* `numFactors`: Number of factors in the design. Must be an integer higher than *2*.
+
+The following optional arguments can be set:
+*  `fraction`: Integer indicating the fraction of full-factorial cube, expressed as an exponent of 1/2. If not set by the user, the default values are the following:
+
+
+* `centerPoints`: Number of center points to be added in the factorial and axial parts of the design.
+    Can be one of:
+    * 'orthogonal' (default): Number of center points will be computed so that an orthogonal design will be provided.
+    * 'uniform'   : Number of center points will be computed so that uniform precision will be achieved.
+    * A strictly positive integer, specifying the number of center points directly.
+
+* `designType`: It defines the type of the CCD. 
+    Can be one of:
+    * 'circumscribed' (default): It is the original type of CCD, where axial points are located at distance *a* from the center point.
+    * 'inscribed' : The inscribed CCD is characterized by that axial points are 
+                    located at factor levels *−1* and *1*, while the factorial points are brought into the interior of the design space and are located at distance *1/a* from the center point.
+    * 'faced': In a face-centered CCD, the axial points are located at a distance equal to *1* from the center point, i.e. at the face of the design cube if the design involves three experimental factors.
+        
+       
+For *n > 2* factors, the output DoE matrix has dimensions *m* by *n*, with *m* being the number of runs in the design. 
+Each row represents one run, with settings for all factors represented in the corresponding columns. The resulting factor values are normalized, so that the cube points thaveake values between *-1* and *1*.
+
+##### Example
 
 ### Latin Hypercube Sampling <a name="lhs"></a>
 

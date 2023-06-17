@@ -292,7 +292,7 @@ def numCenterPoints(numFactors: int, fraction: int, centerPoints: Union[str, int
 
 def ccdesign(
     numFactors  : int, 
-    fraction    : int,
+    fraction    : int = None,
     centerPoints: Union[int, Literal["orthogonal", "uniform"]] = 'orthogonal', 
     designType  : Literal["circumscribed", "inscribed", "faced"] = 'circumscribed', 
     ) -> np.array:
@@ -306,7 +306,7 @@ def ccdesign(
             * 'uniform'   : Number of center points will be computed so that uniform precision will be achieved.
             * integer     : Number of center points to be used in the design.
 
-        designType: Options that defines the type of the CCD. 
+        designType: Option that defines the type of the CCD. 
             Can be one of:
             * 'circumscribed': is the original type of CCD, where axial points are located at 
                             distance a from the center point.

@@ -41,6 +41,45 @@ def _checkConsecutiveSigns(s: str) -> bool:
     return False
 
 
+def _checkBaseFactors(factors: dict):
+    """ Checks if all base names of the generated factors appear as base factors 
+        themselves. Raises a ValueError if not.
+        Inputs:
+            factors: Dictionary of factors
+        Outputs:
+            None
+    """
+
+    factorNames = [f['name'] for f in factors if f['isBase']]
+
+    for f in factors:
+        if not f['isBase']:
+            for bFactor in f['baseNames']:
+                if not bFactor in factorNames:
+                    curf = f['name']
+                    msg  = f'Factor "{bFactor}" of the generated factor "{curf}" does not appear as a base factor in the generator string.'
+                    raise ValueError(msg)
+
+    return
+
+
+def _checkUnique(factors: dict):
+    """ Checks for duplicate factors. 
+        Inputs:
+            factors: Dictionary of factors
+        Outputs:
+            None
+    """
+    
+    names = [f['name'] for f in factors]
+    allUnique = len(names) == len(set(names))
+
+    if not allUnique:
+        raise ValueError('Duplicate factors detected.')
+
+    return
+
+
 def parse(s: str) -> list:
     """ Parses generator string to produce a list containing the base factors,
         and a list containing the generated (derived) factors from the base ones.
@@ -79,7 +118,7 @@ def parse(s: str) -> list:
         
         # Check if consecutive signs exist
         if _checkConsecutiveSigns(factor):
-            raise ValueError(f'Consecutive sign characters detected. Exiting.')
+            raise ValueError(f'Consecutive sign characters detected.')
         
         f = { # Make output dictionary
             'name'  : factor.replace('+', ''), # Ignore + signs. They are implied
@@ -92,6 +131,12 @@ def parse(s: str) -> list:
         # Append, increment and continue
         factors.append(f)
         factorNo += 1
-    
+
+    # Checks if the generated factors consist only of the base factors
+    _checkBaseFactors(factors)
+
+    # Checks if all factors are unique
+    _checkUnique(factors)
+
     return factors
 

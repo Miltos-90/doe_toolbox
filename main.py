@@ -2,23 +2,16 @@
 import doe_box as dbox
 dbox.fullfact(levels = [5, 2])
 
-
 #%%
-dbox.fracfact('a b c abc')
-
-#%%
+dbox.fracfact('a b c -abc')
 
 #%%
 
-full = dbox.fullfact(levels = [2, 2, 3])
-frac = fracfact('a b c abc')
-ff2  = ff2n(3)
-print(full)
-print(frac)
-print(ff2)
+dbox.fracfactgen(terms = 'a b c d ab', resolution = 3)
+
+#%%
 
 # %%
-from factorial import fracfactgen
 
 termStr = 'a b c d e f g h ab be bc bd bf be';
 termStr = 'a b c d ab';
@@ -30,22 +23,22 @@ termStr = 'a b c d e f g h ad de';
 
 # Default values
 for r in [3,4,5,6]:
-    gens = fracfactgen(termStr, resolution = r)
+    gens = dbox.fracfactgen(termStr, resolution = r)
     print(f'{r}: {gens}')
 
 
+#%%
+
+dbox.ccdesign(3, 1, designType = 'circumscribed')
+
 
 # %%
-import response_surface as rs
 
-rs.ccdesign(3, 1, designType = 'circumscribed')
 rs.bbdesign(numFactors = 3)
 
 # %%
 
-from lhs import lhs
-
-lhs(numSamples = 3, numVariables = 4, smooth = False, criterion = 'maxdist')
+dbox.lhs(numSamples = 10, numVariables = 4, smooth = True, criterion = 'maxdist')
 
 # %%
 
