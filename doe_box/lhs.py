@@ -64,7 +64,7 @@ def _getScore(x: np.array, criterion: str) -> float:
 def lhs(
     numSamples: int, numVariables: int, 
     criterion : Literal['maxdist', 'mincorr', None] = 'maxdist',
-    smooth: bool = True
+    smooth    : bool = True
     ) -> np.array:
     """ Latin hypercube sampling (LHS) design of experiments [1].
         Inputs: 
@@ -111,13 +111,7 @@ def lhs(
         # Make a new design
         x = _makeSample(numSamples, numVariables, smooth)
         s = _getScore(x, criterion)
-
-        # Maximize min. distance or minimize sum of sq. corrs
-        improved = (criterion == 'maxdist' and s > bestScore) or \
-                   (criterion == 'mincorr' and s < bestScore)  
-        
-        if improved: bestDesign, bestScore = x, s
-        
+        if s > bestScore: bestDesign, bestScore = x, s        
         curIter += 1
 
     return bestDesign

@@ -212,7 +212,6 @@ Each row represents one run, with settings for all factors represented in the co
 
 The output matrix dBB is m-by-n, where m is the number of runs in the design. Each row represents one run, with settings for all factors represented in the columns. Factor values are normalized so that the cube points take values between -1 and 1.
 
-
 ##### Example
 The following generates a two-factor, full-factorial, circumscribed, orthogonal CCD:
 
@@ -238,16 +237,101 @@ array([[-1, -1,  0],
 
 ### Latin Hypercube Sampling <a name="lhs"></a>
 
+#### lhs
+
+##### Description
 Latin Hypercube Sampling (LHS) is a statistical sampling technique used to efficiently explore the parameter space of a system or model. It is commonly employed in simulation studies, sensitivity analysis, and optimization problems.
 
-In LLHS, the range of each input variable or factor is divided into equally spaced intervals. Within each interval, a single sample point is randomly selected. The key feature of LHS is that it ensures that each level or bin of each factor occurs exactly once in the sampled dataset, providing a representative and evenly distributed coverage of the parameter space.
+In LHS, the range of each input variable or factor is divided into equally spaced intervals. Within each interval, a single sample point is randomly selected. The key feature of LHS is that it ensures that each level or bin of each factor occurs exactly once in the sampled dataset, providing a representative and evenly distributed coverage of the parameter space.
 
 To generate a design of this type, the `lhs` function can be used.
+Its input arguments include:
+* `numSamples`  : Number of samples to be generated, specified as a positive integer.
+* `numVariables`: Number of variables in the design, specified as a positive integer.
 
+Additional optional arguments include:
+* `criterion` : Criterion to be used to evaluate the improvement of the  design over each iteration. It can be one of:
+    * 'maxdist' (default): Maximizes the minimum sample-to-sample distance.
+    * 'mincorr': Minimize the sum of between-column squared correlations.
+* `smooth`: Boolean indicator whether the points that will be produced 
+    should be randomly distributed.
+    * If `smooth = True` (default): One point from each of the
+    intervals: (0, 1/*n*), (1/*n* , 2/*n*),
+    (1-1/*n*, 1), will be sampled, with a subsequent random permutation.
+    * If `smooth = False`:
+    The points will produced by sampling only at the midpoints of the intervals, i.e. at  
+    .5/*n*, 1.5/*n*, ..., 1 - .5/*n*,
+    with *n* being the value of `numSamples` selected.
+    The de
+
+For *n* `numSamples` and *m* `numVariables`, the function returns a Latin hypercube sample matrix of size *n*-by-*m*. For each column of the output matrix, the *n* values are randomly distributed, with each one from the intervals defined according to the value of `smooth`.
+
+##### Example
+
+The following generates a Latin hypercube sample of ten rows (samples) and three columns (variables):
+
+```python
+>>> import numpy as np
+>>> np.random.seed(10) # Set the seed for reproducibility
+>>> dbox.lhs(numSamples = 10, numVariables = 3)
+
+array([[0.75248678, 0.9707202 , 0.69357489],
+       [0.60211809, 0.16602922, 0.45049514],
+       [0.10229193, 0.35592262, 0.26817272],
+       [0.8480203 , 0.24218636, 0.51460662],
+       [0.49319027, 0.75354692, 0.32180509],
+       [0.02813972, 0.8413978 , 0.99629056],
+       [0.96493436, 0.44368093, 0.87002701],
+       [0.54876658, 0.63265331, 0.08408063],
+       [0.39495223, 0.06621841, 0.18919362],
+       [0.28210972, 0.51141729, 0.7634635 ]])
+```
+
+Each column of the output matrix contains one random number in each interval [0,0.1], [0.1,0.2], [0.2,0.3], [0.3,0.4], [0.4,0.5], [0.5,0.6], [0.6,0.7], [0.7,0.8], [0.8,0.9], and [0.9,1].
+
+To obtain a discrete design, the default value of `smooth` should be overwritten, and set to `False`:
+
+```python
+>>> import numpy as np
+>>> np.random.seed(10) # Set the seed for reproducibility
+>>> x = dbox.lhs(numSamples = 10, numVariables = 3, smooth = False)
+>>> x 
+array([[0.75, 0.85, 0.15],
+       [0.05, 0.95, 0.55],
+       [0.65, 0.55, 0.05],
+       [0.35, 0.15, 0.45],
+       [0.15, 0.25, 0.25],
+       [0.25, 0.75, 0.65],
+       [0.45, 0.05, 0.75],
+       [0.95, 0.45, 0.95],
+       [0.55, 0.35, 0.85],
+       [0.85, 0.65, 0.35]])
+```
+
+To see the effect of changing the default `criterion`, first evaluate the sum the squared correlation of the *x* matrix above:
+
+```python
+>>> corr  = np.corrcoef(x, rowvar = False) 
+>>> (sum(corr.flatten() ** 2) - 3)/2
+0.07004591368227708
+```
+
+Subsequently, generating a new matrix with `criterion = mincorr`, the same evaluations result in a squared-correlation sum of:
+
+```python
+>>> np.random.seed(10)
+>>> x = dbox.lhs(numSamples = 10, numVariables = 3, smooth = False, criterion = 'mincorr')
+>>> corr  = np.corrcoef(x, rowvar = False) 
+>>> (sum(corr.flatten() ** 2) - 3)/2
+
+0.027731864095500214
+```
+
+As can be seen, minimizing the correlations results in a design with much lower sum of squared correlations.
 
 ## References
 
-Good starting points for additional information on each experimental design type:
+Good starting points for additional information on each experimental design type can be found on:
 
 * [Factorial designs](https://en.wikipedia.org/wiki/Factorial_experiment)
 * [Box-Behnken designs](https://en.wikipedia.org/wiki/Box%E2%80%93Behnken_design)
